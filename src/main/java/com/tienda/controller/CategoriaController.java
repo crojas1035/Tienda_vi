@@ -13,6 +13,7 @@ public class CategoriaController {
     
     //Se hace el enlace con el servico de categoria
     private final CategoriaService categoriaService;
+    private final MessageSource messageSource;
 
     public CategoriaController(CategoriaService categoriaService) {
         this.categoriaService = categoriaService;
