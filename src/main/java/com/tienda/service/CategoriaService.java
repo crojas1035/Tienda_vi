@@ -24,4 +24,10 @@ public List<Categoria> getCategorias(boolean activo){
     }
     return categoriaRepository.findAll();
     }
+
+@Transactionsl(readOnly = true)
+public Optional<Categoria> getCategoria(Integer idCategoria) { 
+    return categoriaRepository.findById(idCategoria);
+}
+
 }

@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.io.Serializable;
 import lombok.Data;
+import java.util.List;
 
 @Data
 @Entity
@@ -29,5 +30,9 @@ public class Categoria implements Serializable{
     private String rutaImagen;
     
     private boolean activo;
+    
+    @OneToMany(mappedBy="categoria")
+    private List<Producto> productos;
+    
     
 }
