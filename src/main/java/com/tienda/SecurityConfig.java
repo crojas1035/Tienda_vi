@@ -13,6 +13,8 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.context.annotation.Lazy;
+import com.tienda.service.RutaService;
+import com.tienda.domain.Ruta;
 
 
 @Configuration
@@ -73,7 +75,7 @@ public class SecurityConfig {
     // Este metodo se usa en el login
     @Autowired
     public void configurerGlobal(AuthenticationManagerBuilder build, @Lazy PasswordEncoder passwordEncoder, @Lazy UserDetailsService userDetailsService) { 
-        build.userDetailsService(userDetailService).passwordEncoder(passwordEncoder);
+        build.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder);
     }
      
 }

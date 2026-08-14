@@ -47,14 +47,10 @@ public class Usuario implements Serializable{
     private String correo;
     
     @Column (length = 25)
-    @NotNull
     @Size(max=25)
     private String telefono;
-    
-    
-    
+
     @Column (length = 1024)
-    @NotNull
     @Size(max=1024)
     private String rutaImagen;
     
