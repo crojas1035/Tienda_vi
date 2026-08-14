@@ -6,6 +6,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import com.tienda.service.CategoriaService;
+import org.springframework.context.MessageSource;
 
 @Controller
 @RequestMapping("/producto")
@@ -19,7 +21,7 @@ public class ProductoController {
     public ProductoController(ProductoService productoService, CategoriaService categoriaService, MessageSource messageSource) {
         this.productoService = productoService;
         this.categoriaService = categoriaService;
-        this.messageSource = productoService;
+        this.messageSource = messageSource;
     }
     
     @GetMapping("/listado")

@@ -6,6 +6,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.context.MessageSource;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.bind.annotation.PathVariable;
+import java.util.Optional;
+import com.tienda.domain.Categoria;
+import java.util.Locale;
 
 @Controller
 @RequestMapping("/categoria")
@@ -15,8 +21,9 @@ public class CategoriaController {
     private final CategoriaService categoriaService;
     private final MessageSource messageSource;
 
-    public CategoriaController(CategoriaService categoriaService) {
+    public CategoriaController(CategoriaService categoriaService, MessageSource messageSource) {
         this.categoriaService = categoriaService;
+        this.messageSource = messageSource;
     }
     
     
@@ -33,7 +40,7 @@ public class CategoriaController {
     @GetMapping("/modificar/{idCategoria}")
     public String modificar(@PathVariable("idCategoria") Integer idCategoria, Model model, RedirectAttributes redirectAttributes) {
         Optional<Categoria> categoriaOpt = categoriaService.getCategoria(idCategoria);
-        if (categoriaOpt.isEmpty) {
+        if (categoriaOpt.isEmpty()) {
             redirectAttributes.addFlashAttribute("error", messageSource.getMessage("categoria.error01", null, Locale.getDefault()));
             return "redirect:/categoria/listado";
         } 

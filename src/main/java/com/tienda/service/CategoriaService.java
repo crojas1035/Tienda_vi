@@ -6,6 +6,8 @@ import com.tienda.repository.CategoriaRepository;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.Optional;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CategoriaService {
@@ -25,7 +27,7 @@ public List<Categoria> getCategorias(boolean activo){
     return categoriaRepository.findAll();
     }
 
-@Transactionsl(readOnly = true)
+@Transactional(readOnly = true)
 public Optional<Categoria> getCategoria(Integer idCategoria) { 
     return categoriaRepository.findById(idCategoria);
 }

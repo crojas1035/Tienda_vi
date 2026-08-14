@@ -1,7 +1,7 @@
 
 package com.tienda.controller;
 
-import.tienda.domain.Categoria;
+import com.tienda.domain.Categoria;
 import com.tienda.service.CategoriaService;
 import com.tienda.service.ProductoService;
 import java.util.Optional;
@@ -34,7 +34,7 @@ public class IndexController {
     @GetMapping("/consultas/{idCategoria}")
     public String listado(@PathVariable("idCategoria") Integer idCategoria, Model model) {
         Optional<Categoria> categoriaOpt = categoriaService.getCategoria(idCategoria);
-        if (categoriaOpt.isEmpty) {
+        if (categoriaOpt.isEmpty()) {
             model.addAttribute("productos", java.util.Collections.EMPTY_LIST);
         } else { 
             var categoria = categoriaOpt.get();
