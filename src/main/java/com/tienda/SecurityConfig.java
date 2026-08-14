@@ -10,37 +10,29 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.context.annotation.Lazy;
+
 
 @Configuration
 public class SecurityConfig {
-
-    //A continuacion van las rutas (urls) que los usuarios van a solicitar al sistema techshop
-    //La próxima semana esto se borra...
-    //A continuacion van las rutas que TODOS los usuarios pueden acceder sin problema
-    public static final String[] PUBLIC_URLS = {"/","/index","/consultas/**",
-    "/fav/**","/webjars/**","/js/**","/login","/acceso_denegado"};
-
-    //A continuacion van las rutas que un USUARIO puede acceder sin problema
-    public static final String[] USUARIO_URLS = {"/facturas/carrito"};
-
-    //A continuacion van las rutas que un VENDEDOR puede acceder sin problema
-    public static final String[] VENDEDOR_URLS = {"/categoria/listado",
-    "/producto/listado"};
-
-    //A continuacion van las rutas que un ADMIN puede acceder sin problema
-    public static final String[] ADMIN_URLS = {"/categoria/**",
-    "/producto/**","/usuario/**","/admin/**"};
     
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, @Lazy RutaService rutaService) throws Exception {
+        
+        var rutas = rutaService.getRutas();
         //Se establecen cuales rutas se acceden desde qué roles...
-        http.authorizeHttpRequests(request -> request
-                .requestMatchers(PUBLIC_URLS).permitAll()
-                .requestMatchers(USUARIO_URLS).hasRole("USUARIO")
-                .requestMatchers(VENDEDOR_URLS).hasAnyRole("VENDEDOR", "ADMIN")
-                .requestMatchers(ADMIN_URLS).hasRole("ADMIN")
-                .anyRequest().authenticated()
-        );
+        http.authorizeHttpRequests(request ->  {
+                for (Ruta ruta : rutas) { 
+                    if (ruta.isRequiereRol()) {
+                        request.requestMatchers(ruta.getRuta()).hasRole(ruta.getRol().getRol());
+                    } else {
+                        request.requestMatchers(ruta.getRuta()).permitAll();
+                    }
+                }
+                request.anyRequest().authenticated();
+        });
 
         //Se establece el proceso para hacer "login"
         http.formLogin(login -> login
@@ -78,21 +70,10 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
     
-    @Bean
-    public UserDetailsService user(PasswordEncoder passwordEncoder) {
-        UserDetails user1 = User.builder().username("juan")
-                .password(passwordEncoder.encode("123"))
-                .roles("ADMIN")
-                .build();
-        UserDetails user2 = User.builder().username("rebeca")
-                .password(passwordEncoder.encode("456"))
-                .roles("VENDEDOR")
-                .build();
-        UserDetails user3 = User.builder().username("pedro")
-                .password(passwordEncoder.encode("789"))
-                .roles("USUARIO")
-                .build();
-        return new InMemoryUserDetailsManager(user1, user2, user3);
+    // Este metodo se usa en el login
+    @Autowired
+    public void configurerGlobal(AuthenticationManagerBuilder build, @Lazy PasswordEncoder passwordEncoder, @Lazy UserDetailsService userDetailsService) { 
+        build.userDetailsService(userDetailService).passwordEncoder(passwordEncoder);
     }
      
 }

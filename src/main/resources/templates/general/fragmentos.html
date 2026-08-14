@@ -72,7 +72,7 @@
                 <ul class="navbar-nav" sec:authorize="isAuthenticated()">
                     <li class="nav-item my-auto">
                         <a class="nav-link">
-                            <i class="fas fa-user"></i>
+                            <img th:src="@{${session.usuarioImagen}}" alt="..." height="40" class="rounded-circle"/>
                             <span class="ms-1" sec:authentication="name">Joe</span>
                         </a>
                     </li>
