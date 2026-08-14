@@ -4,9 +4,11 @@ import com.tienda.domain.Item;
 import com.tienda.domain.Factura;
 import com.tienda.domain.Usuario;
 import com.tienda.service.CarritoService;
+import com.tienda.service.ConstanteService;
 import com.tienda.service.FacturaService;
 import com.tienda.service.UsuarioService;
 import jakarta.servlet.http.HttpSession;
+import java.math.BigDecimal;
 import java.util.List;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -22,11 +24,13 @@ public class CarritoController {
     private final CarritoService carritoService;
     private final UsuarioService usuarioService;
     private final FacturaService facturaService;
+    private final ConstanteService constanteService;
 
-    public CarritoController(CarritoService carritoService, UsuarioService usuarioService, FacturaService facturaService) {
+    public CarritoController(CarritoService carritoService, UsuarioService usuarioService, FacturaService facturaService, ConstanteService constanteService) {
         this.carritoService = carritoService;
         this.usuarioService = usuarioService;
         this.facturaService = facturaService;
+        this.constanteService = constanteService;
     }
 
     // --- 1. MOSTRAR EL CARRITO ---
@@ -47,7 +51,7 @@ public class CarritoController {
             HttpSession session,
             Model model) {
         try {
-            
+
             System.out.println("Entro al carrito");
             // 1. Obtener el carrito de la sesión
             List<Item> carrito = carritoService.obtenerCarrito(session);
@@ -59,7 +63,7 @@ public class CarritoController {
             carritoService.guardarCarrito(session, carrito);
 
             // 4. Recalcular y actualizar el Model con los datos necesarios
-            model.addAttribute("carritoTotal", carritoService.calcularTotal(carrito));
+            creaMontos(model, carrito);
             model.addAttribute("listaItems", carrito);
 
             // 5. Retornar el fragmento HTML
@@ -88,28 +92,28 @@ public class CarritoController {
         redirectAttributes.addFlashAttribute("mensaje", "Producto eliminado del carrito.");
         return "redirect:/carrito/listado";
     }
-    
+
     @GetMapping("/carrito/modificar/{idProducto}")
     public String modificar(
             @PathVariable("idProducto") Integer idProducto,
             HttpSession session,
             Model model) {
-        
+
         // 1. Obtener la lista del carrito de la sesión
         List<Item> carrito = carritoService.obtenerCarrito(session);
-        
+
         // 2. Buscar el ítem en la lista del carrito
         Item item = carritoService.buscarItem(carrito, idProducto);
-        
+
         if (item == null) {
             // Manejar el caso de que el ítem no esté en el carrito
             System.out.println("Hubo problemas");
-            return "redirect:/carrito/listado"; 
+            return "redirect:/carrito/listado";
         }
-        
+
         // 3. Pasar el ítem encontrado (con su cantidad actual) al modelo
         model.addAttribute("item", item);
-        
+
         // 4. Retornar la vista
         return "/carrito/modifica";
     }
@@ -138,14 +142,14 @@ public class CarritoController {
     @GetMapping("/facturar/carrito")
     public String facturarCarrito(HttpSession session, RedirectAttributes redirectAttributes) {
         System.out.println("Va a facturar");
-        
+
         try {
             List<Item> carrito = carritoService.obtenerCarrito(session);
 
             // Obtención del usuario autenticado*
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             String username = auth.getName();
-            System.out.println("El username es:"+username);
+            System.out.println("El username es:" + username);
             Usuario usuario = usuarioService.getUsuarioPorUsername(username).get();
 
             // 1. La lógica transaccional ocurre en el servicio
@@ -157,7 +161,7 @@ public class CarritoController {
             // 3. Pasar el ID de la factura como Flash Attribute
             redirectAttributes.addFlashAttribute("idFactura", factura.getIdFactura());
             redirectAttributes.addFlashAttribute("mensaje", "Compra procesada con éxito. Factura Nro: " + factura.getIdFactura());
-            
+
             // 4. Redirigir a una ruta nueva para ver la factura
             System.out.println("Ver la Factura");
             return "redirect:/carrito/verFactura";
@@ -168,19 +172,27 @@ public class CarritoController {
             return "redirect:/carrito/listado";
         }
     }
-    
+
     // Nuevo método para mostrar la factura
     @GetMapping("/carrito/verFactura")
     public String verFactura(@ModelAttribute("idFactura") Integer idFactura, Model model) {
         if (idFactura == null) {
             // Si no se pasó el ID por flash, redirigir a donde lista de facturas o index
-            return "redirect:/index"; 
+            return "redirect:/index";
         }
-        
+
         // 1. Obtener la factura COMPLETA (incluyendo ventas)        
-        Factura factura = facturaService.getFacturaConVentas(idFactura); 
-        
+        Factura factura = facturaService.getFacturaConVentas(idFactura);
+
         model.addAttribute("factura", factura);
         return "/carrito/verFactura"; // Nombre del archivo Thymeleaf
     }
+
+    private void creaMontos(Model model,  List<Item> carrito) {
+        BigDecimal totalColones = carritoService.calcularTotal(carrito);
+        BigDecimal totalDolares = constanteService.demeDolares(totalColones);
+        model.addAttribute("totalColones", totalColones);
+        model.addAttribute("totalDolares", totalDolares);
+    }
+
 }

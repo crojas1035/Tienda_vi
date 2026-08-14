@@ -5,7 +5,7 @@
             type="submit"
             class="btn btn-primary">
             <i class="fas fa-cart-plus"></i>
-            [[#{carrito.verCarrito}]] [[${#numbers.formatCurrency(carritoTotal)}]]
+            [[#{carrito.verCarrito}]] [[${#numbers.formatCurrency(totalColones)}]] us$ [[${totalDolares}]]
         </button>
     </form>
 </div>     
@@ -66,7 +66,10 @@
                 <div class="card-body">
                     <h3>[[#{carrito.totalCompra}]]</h3>
                     <h4 class="fs-4">
-                        [[${#numbers.formatCurrency(totalCarrito)}]]
+                        [[${#numbers.formatCurrency(totalColones)}]]
+                    </h4>
+                    <h4 class="fs-4">
+                        US$ [[${totalDolares}]]
                     </h4>
                 </div>
             </div>
